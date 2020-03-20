@@ -1,7 +1,7 @@
 package ipBot.bot;
 
-
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -18,34 +18,53 @@ import net.dv8tion.jda.api.entities.Message;
 public class Bot {
 
 	public static String getIp() throws IOException {
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(
-                    whatismyip.openStream()));
-            String ip = in.readLine();
-            return ip;
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-	
+		URL whatismyip = new URL("http://checkip.amazonaws.com");
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+			String ip = in.readLine();
+			return ip;
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	public static void main(String[] args) throws LoginException, InterruptedException, IOException {
-		SettingsLoader settingsLoading = new SettingsLoader("ip_bot_settings.json");
-		Settings settings = settingsLoading.getSettings();
+		final String filename = "ip-bot-settings.json";
+
+		Settings settings;
+
+		if ((new File(filename).exists())) {
+			SettingsLoader settingsLoading = new SettingsLoader(filename);
+			settings = settingsLoading.getSettings();
+		} else {
+			settings = new Settings();
+			settings.applyDefaults();
+			settings.saveSettings(filename);
+		}
+
 		Discord discord = new Discord(settings.token);
-		discord.sendMessage("@everyone , the server has started!, IP:"+getIp()+":"+settings.port, settings.channelID);
+
+		if (args.length == 0 || args[0].toLowerCase().contains("start")) {
+			discord.sendMessage(
+					"@" + settings.roleName + ", the server has started!, IP:" + getIp() + ":" + settings.port,
+					settings.channelID);
+		} else if (args[0].toLowerCase().contains("stop")) {
+			discord.sendMessage("The server has stopped!", settings.channelID);
+		}
+
 		discord.disconnect();
 	}
 
-	
-} class Discord {
+}
+
+class Discord {
 
 	private JDA jda;
 
@@ -59,7 +78,7 @@ public class Bot {
 	public void disconnect() {
 		this.jda.shutdown();
 	}
-	
+
 	public void sendMessage(String message, String channelID) {
 
 		if (message.length() > 2000) {
@@ -83,4 +102,3 @@ public class Bot {
 	}
 
 }
-		

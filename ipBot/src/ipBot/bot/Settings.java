@@ -12,6 +12,7 @@ public class Settings {
 	public String token = "token";
 	public String channelID = "channelID";
 	public String port = "25565";
+	public String roleName = "everyone";
 	
 	public Settings() {
 		// empty cos yeeee
@@ -21,6 +22,7 @@ public class Settings {
 		token = "token";
 		channelID = "channelID";
 		port = "25565";
+		roleName = "everyone";
 	}
 
 	public void saveSettings(String settingsFile) throws JsonIOException, IOException {
